@@ -4,17 +4,22 @@ import com.nishant.assignment.springassignment.entities.Department;
 import com.nishant.assignment.springassignment.exceptions.DoesNotExistsException;
 import com.nishant.assignment.springassignment.services.DepartmentRepository;
 import com.nishant.assignment.springassignment.services.EmployeeRepository;
+import com.nishant.assignment.springassignment.specifications.DepartmentSearchSpecification;
+import com.sipios.springsearch.anotation.SearchSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -23,8 +28,8 @@ public class DepartmentController {
 
     private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
-
     Logger LOG = LoggerFactory.getLogger(DepartmentController.class);
+    private DepartmentSearchSpecification departmentSearchSpecification;
 
     @Autowired
     public DepartmentController(DepartmentRepository departmentRepository, EmployeeRepository employeeRepository) {
@@ -89,5 +94,11 @@ public class DepartmentController {
 
             return ResponseEntity.noContent().build();
         }
+    }
+
+    // search api
+    @GetMapping("/search/department")
+    public ResponseEntity<List<Department>> searchForDepartments(@SearchSpec Specification<Department> departmentSpecification) {
+        return new ResponseEntity<>(departmentSearchSpecification.findAll(Specification.where(departmentSpecification)), HttpStatus.OK);
     }
 }
